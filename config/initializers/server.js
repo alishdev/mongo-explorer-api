@@ -27,7 +27,9 @@ var start =  function(cb) {
   app.use(bodyParser.json({type: '*/*'}));
 
   logger.info('[SERVER] Initializing routes');
-  require('../../app/routes/index')(app);
+
+  var routes = require('../../app/routes/');
+  app.use('/', routes);
 
   app.use(express.static(path.join(__dirname, 'public')));
 

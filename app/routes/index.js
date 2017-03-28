@@ -1,9 +1,10 @@
-var express = require('express');
+var routes = require('express').Router();
 
-module.exports = function(app) {
-  'use strict';
-  
-  app.get('/', function(req, res){
-    res.render('index');
-  });
-};
+routes.get('/', (req, res) => {
+  res.render('index');
+});
+
+const dbs = require('./db');
+routes.use('/db', dbs);
+
+module.exports = routes;
