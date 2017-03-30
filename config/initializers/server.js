@@ -26,6 +26,14 @@ var start =  function(cb) {
   app.use(bodyParser.urlencoded({extended: true}));
   app.use(bodyParser.json({type: '*/*'}));
 
+      // use middleware to read headers and get mongo db properties
+  app.use(function(req, res, next){
+      // read mongo server properties from the header
+      req.mongoServer = req.headers['mongo-server'];
+      req.mongoPort = req.headers['mongo-server-port'];
+      next();
+  });
+
   logger.info('[SERVER] Initializing routes');
 
   var routes = require('../../app/routes/');
