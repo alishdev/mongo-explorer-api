@@ -1,20 +1,73 @@
 // models/db/db.js
 // Db class
-
-// first test with json file
-const data = require('./testdb.json');
+var Database = require('mongodb').Db,
+    MongoClient = require('mongodb').MongoClient,
+    Server = require('mongodb').Server,
+    logger = require('winston');
 
 // Get particular database properties
-exports.get = function(dbName, cb) {
-    dbName = dbName || '';
-    const db = data.dbs.find(x => x.name === dbName);
-    if (!db)
-        return cb('Database not found: ' + dbName);
-    cb(null, {name:db.name, colCount: db.collections.length});
+exports.get = function(connectionString, dbName, cb) {
+    logger.info("Inside db.get, dbName: " + dbName);
+    logger.info(connectionString);
+
+    // verify database exists
+    allDbs(connectionString, function(err, dbs){
+        if (err)
+            cb(err);
+        dbName = dbName || '';
+        
+        if (dbs.indexOf(dbName) === -1)
+            return cb('Database not found: ' + dbName);
+
+        var db = new Database(dbName, new Server(connectionString.server, connectionString.port));
+        // read collections
+        db.open(function(err, db) {
+            if (err)
+                cb(err);
+            
+            var res = {name: dbName, collections : []};
+            db.listCollections().toArray(function(err, collections) {
+                // collections is an array of collection info objects that look like:
+                // { name: 'test', options: {} }
+                if (err)
+                    cb(err);
+                                
+                collections.forEach(function(coll){
+                    res.collections.push(coll.name);
+                });
+
+                db.close();
+                cb(null, res);    
+            });
+        });    
+    });
 }
 
 // Get all databases
-exports.all = function(cb) {
-    const dbs = data.dbs.map(function(db){return db.name;});
-    cb(null, dbs);
+ function allDbs(connectionString, cb) {
+    logger.info("Inside db.all");
+    //logger.info(connectionString);
+
+    var db = new Database('test', new Server(connectionString.server, connectionString.port));
+    // Establish connection to db
+    db.open(function(err, db) {
+        if (err)
+            cb(err);
+        // Use the admin database for the operation
+        var adminDb = db.admin();
+
+        // List all the available databases
+        adminDb.listDatabases(function(err, dbs) {
+            db.close();
+            //logger.info(dbs);
+            
+            if (err)
+                cb(err);
+
+            const dbFound = dbs.databases.map(function(db1){return db1.name;});
+            cb(null, dbFound);
+        });
+    });
 }
+
+exports.all = allDbs;

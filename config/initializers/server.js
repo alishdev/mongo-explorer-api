@@ -29,8 +29,10 @@ var start =  function(cb) {
       // use middleware to read headers and get mongo db properties
   app.use(function(req, res, next){
       // read mongo server properties from the header
-      req.mongoServer = req.headers['mongo-server'];
-      req.mongoPort = req.headers['mongo-server-port'];
+      req.connectionString = {};
+      req.connectionString.server = req.headers['mongo-server'] || 'localhost';
+      req.connectionString.port = req.headers['mongo-server-port'] || 27017;
+      logger.info(req.connectionString);
       next();
   });
 

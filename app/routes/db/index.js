@@ -14,7 +14,7 @@ router.get('/:dbName/collection', function(req, res) {
 });
 
 router.get('/:dbName', function(req, res) {    
-    database.get(req.params.dbName, function(err, db){
+    database.get(req.connectionString, req.params.dbName, function(err, db){
         if (err)
             res.status(404).send(err);
         res.status(200).json(db);
@@ -22,7 +22,7 @@ router.get('/:dbName', function(req, res) {
 });
 
 router.get('/', function(req, res) {
-    database.all(function(err, dbs){
+    database.all(req.connectionString, function(err, dbs){
         if (err)
             res.status(404).send(err);
         
