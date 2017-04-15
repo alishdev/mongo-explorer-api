@@ -1,10 +1,11 @@
 // config/initializers/server.js
-
+var swaggerJSDoc = require('swagger-jsdoc');
 var express = require('express');
 var path = require('path');
 var exphbs  = require('express-handlebars');
 // Local dependecies
 var config = require('nconf');
+
 
 // create the express app
 // configure middlewares
@@ -17,6 +18,29 @@ var start =  function(cb) {
   'use strict';
   // Configure express 
   app = express();
+
+  // swagger definition
+  var swaggerDefinition = {
+    info: {
+      title: 'Mongo Explorer API',
+      version: '1.0.0',
+      description: 'Explore any Mongo database',
+    },
+    host: 'localhost:4000',
+    basePath: '/',
+  };
+
+  // options for the swagger docs
+  var options = {
+    // import swaggerDefinitions
+    swaggerDefinition: swaggerDefinition,
+    // path to the API docs
+    apis: [__dirname + '../../app/routes/*.js', __dirname + '/../../app/routes/db/*.js'],
+  };
+
+  // initialize swagger-jsdoc
+  var swaggerSpec = swaggerJSDoc(options);
+
 
   app.engine('handlebars', exphbs({defaultLayout: '../../app/views/layouts/main'}));
   app.set('view engine', 'handlebars');
@@ -53,11 +77,10 @@ var start =  function(cb) {
   });
 
   logger.info('[SERVER] Initializing routes');
+  app.use(express.static(path.join(__dirname, '../../app/public')));
 
   var routes = require('../../app/routes/');
   app.use('/', routes);
-
-  app.use(express.static(path.join(__dirname, 'public')));
 
   // Error handler
   app.use(function(err, req, res, next) {
@@ -67,6 +90,12 @@ var start =  function(cb) {
       error: (app.get('env') === 'development.js' ? err : {})
     });
     next(err);
+  });
+
+  // serve swagger
+  app.get('/swagger.json', function(req, res) {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
   });
 
   app.listen(config.get('NODE_PORT'));

@@ -4,6 +4,9 @@ routes.get('/', (req, res) => {
   res.render('index');
 });
 
+
+
+
 const dbs = require('./db');
 routes.use('/db', dbs);
 
