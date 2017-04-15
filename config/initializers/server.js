@@ -29,11 +29,27 @@ var start =  function(cb) {
       // use middleware to read headers and get mongo db properties
   app.use(function(req, res, next){
       // read mongo server properties from the header
-      req.connectionString = {};
-      req.connectionString.server = req.headers['mongo-server'] || 'localhost';
-      req.connectionString.port = req.headers['mongo-server-port'] || 27017;
-      logger.info(req.connectionString);
-      next();
+      // req.connectionString = {};
+      // req.connectionString.server = req.headers['mongo-server'] || 'localhost';
+      // req.connectionString.port = req.headers['mongo-server-port'] || 27017;
+      // logger.info(req.connectionString);
+      var parseConnectionString = require('../../app/helpers/request-helper');
+      parseConnectionString.parseConnectionString(req, logger);
+
+      var dbHelper = require('../../app/helpers/db-helper');
+      dbHelper.getMongoConnection(req.connectionString, logger, function(err, db){
+        if (err){
+          res.status(err.status || 500);
+          res.json({
+            message: err.message,
+            error: (app.get('env') === 'development.js' ? err : {})
+          });
+        }
+        else{
+          req.connectionString.mongoDb = db;
+          next();
+        }
+      });
   });
 
   logger.info('[SERVER] Initializing routes');
@@ -48,7 +64,7 @@ var start =  function(cb) {
     res.status(err.status || 500);
     res.json({
       message: err.message,
-      error: (app.get('env') === 'development' ? err : {})
+      error: (app.get('env') === 'development.js' ? err : {})
     });
     next(err);
   });

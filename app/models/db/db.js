@@ -1,7 +1,6 @@
 // models/db/db.js
 // Db class
 var Database = require('mongodb').Db,
-    MongoClient = require('mongodb').MongoClient,
     Server = require('mongodb').Server,
     logger = require('winston');
 
@@ -10,37 +9,53 @@ exports.get = function(connectionString, dbName, cb) {
     logger.info("Inside db.get, dbName: " + dbName);
     logger.info(connectionString);
 
-    // verify database exists
-    allDbs(connectionString, function(err, dbs){
+    var db = connectionString.mongoDb;
+
+    var res = {name: dbName, collections : []};
+    db.listCollections().toArray(function(err, collections) {
+        // collections is an array of collection info objects that look like:
+        // { name: 'test', options: {} }
         if (err)
             cb(err);
-        dbName = dbName || '';
-        
-        if (dbs.indexOf(dbName) === -1)
-            return cb('Database not found: ' + dbName);
+                        
+        collections.forEach(function(coll){
+            res.collections.push(coll.name);
+        });
 
-        var db = new Database(dbName, new Server(connectionString.server, connectionString.port));
-        // read collections
-        db.open(function(err, db) {
-            if (err)
-                cb(err);
-            
-            var res = {name: dbName, collections : []};
-            db.listCollections().toArray(function(err, collections) {
-                // collections is an array of collection info objects that look like:
-                // { name: 'test', options: {} }
-                if (err)
-                    cb(err);
-                                
-                collections.forEach(function(coll){
-                    res.collections.push(coll.name);
-                });
-
-                db.close();
-                cb(null, res);    
-            });
-        });    
+        cb(null, res);    
     });
+
+    // // verify database exists
+    // allDbs(connectionString, function(err, dbs){
+    //     if (err)
+    //         cb(err);
+    //     dbName = dbName || '';
+        
+    //     if (dbs.indexOf(dbName) === -1)
+    //         return cb('Database not found: ' + dbName);
+
+    //     var db = new Database(dbName, new Server(connectionString.server, connectionString.port));
+    //     // read collections
+    //     db.open(function(err, db) {
+    //         if (err)
+    //             cb(err);
+            
+    //         var res = {name: dbName, collections : []};
+    //         db.listCollections().toArray(function(err, collections) {
+    //             // collections is an array of collection info objects that look like:
+    //             // { name: 'test', options: {} }
+    //             if (err)
+    //                 cb(err);
+                                
+    //             collections.forEach(function(coll){
+    //                 res.collections.push(coll.name);
+    //             });
+
+    //             db.close();
+    //             cb(null, res);    
+    //         });
+    //     });    
+    // });
 }
 
 // Get all databases
