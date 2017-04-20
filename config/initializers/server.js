@@ -1,4 +1,5 @@
 // config/initializers/server.js
+
 var swaggerJSDoc = require('swagger-jsdoc');
 var express = require('express');
 var path = require('path');
@@ -35,7 +36,10 @@ var start =  function(cb) {
     // import swaggerDefinitions
     swaggerDefinition: swaggerDefinition,
     // path to the API docs
-    apis: [__dirname + '../../app/routes/*.js', __dirname + '/../../app/routes/db/*.js'],
+    apis: [__dirname + '../../app/routes/*.js', 
+          __dirname + '/../../app/routes/db/*.js',
+          __dirname + '/../../app/routes/collection/*.js',
+          __dirname + '/../../app/routes/document/*.js'],
   };
 
   // initialize swagger-jsdoc

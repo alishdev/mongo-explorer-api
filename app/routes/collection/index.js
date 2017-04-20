@@ -1,4 +1,4 @@
-// app/routes/db/index.js
+// app/routes/collection/index.js
 
 // route file for MongoDB databases
 var logger = require('winston');
@@ -25,18 +25,64 @@ let router = require('express').Router(),
  *           type: string
  */
 
+//--------  Collection object
+/**
+ * @swagger
+ * definitions:
+ *   Collection:
+ *     type: object
+ *     properties:
+ *       name:
+ *         type: string
+ *       docsCount:
+ *         type: number
+ */
 
 /**************************************************************** 
- * Database API
+ * Collection API
  ****************************************************************/
 
 /**
  * @swagger
- * /api/db/{dbname}:
+ * /api/db/{dbname}/collection/{colname}:
  *   get:
  *     tags:
- *       - Databases
- *     description: Returns a single db
+ *       - Collections
+ *     description: Returns a single collection information
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: dbname
+ *         description: Database name
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: colname
+ *         description: Collection name
+ *         in: path
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: A single collection in database
+ *         schema:
+ *           $ref: '#definitions/Collection'
+ */
+router.get('/:dbname/collection/:colname', function(req, res) {    
+    database.get(req.params.dbname, function(err, db){
+        if (err)
+            res.status(404).send(err);
+        res.status(200).json(db);
+    });
+});
+
+/**
+ * @swagger
+ * /api/db/{dbname}/collection:
+ *   get:
+ *     tags:
+ *       - Collections
+ *     description: Returns names of all collections in database
  *     produces:
  *       - application/json
  *     parameters:
@@ -47,36 +93,13 @@ let router = require('express').Router(),
  *         type: string
  *     responses:
  *       200:
- *         description: A single database
- *         schema:
- *           $ref: '#definitions/Database'
- */
-router.get('/:dbname', function(req, res) {    
-    database.get(req.connectionString, req.params.dbname, function(err, db){
-        if (err)
-            res.status(404).send(err);
-        res.status(200).json(db);
-    });
-});
-
-/**
- * @swagger
- * /api/db/:
- *   get:
- *     tags:
- *       - Databases
- *     description: Returns names of all databases
- *     produces:
- *       - application/json
- *     responses:
- *       200:
- *         description: array of database names
+ *         description: array of collection names
  *         schema:
  *          type: array
  *          items:
  *              type: string
  */
-router.get('/', function(req, res) {
+router.get('/:dbname/collection', function(req, res) {
     database.all(req.connectionString, function(err, dbs){
         if (err)
             res.status(404).send(err);
@@ -84,5 +107,3 @@ router.get('/', function(req, res) {
         res.status(200).json(dbs);
     });
 });
-
-module.exports = router;
