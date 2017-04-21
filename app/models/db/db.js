@@ -7,12 +7,15 @@ var Database = require('mongodb').Db,
 // Get particular database properties
 exports.get = function(connectionString, dbName, cb) {
     logger.info("Inside db.get, dbName: " + dbName);
-    logger.info(connectionString);
+    logger.info(connectionString.server);
+    logger.info(connectionString.port);
+    logger.info(connectionString.dbName);
 
     var db = connectionString.mongoDb;
 
     var res = {name: dbName, collections : []};
     db.listCollections().toArray(function(err, collections) {
+        db.close();
         // collections is an array of collection info objects that look like:
         // { name: 'test', options: {} }
         if (err)
@@ -24,38 +27,6 @@ exports.get = function(connectionString, dbName, cb) {
 
         cb(null, res);    
     });
-
-    // // verify database exists
-    // allDbs(connectionString, function(err, dbs){
-    //     if (err)
-    //         cb(err);
-    //     dbName = dbName || '';
-        
-    //     if (dbs.indexOf(dbName) === -1)
-    //         return cb('Database not found: ' + dbName);
-
-    //     var db = new Database(dbName, new Server(connectionString.server, connectionString.port));
-    //     // read collections
-    //     db.open(function(err, db) {
-    //         if (err)
-    //             cb(err);
-            
-    //         var res = {name: dbName, collections : []};
-    //         db.listCollections().toArray(function(err, collections) {
-    //             // collections is an array of collection info objects that look like:
-    //             // { name: 'test', options: {} }
-    //             if (err)
-    //                 cb(err);
-                                
-    //             collections.forEach(function(coll){
-    //                 res.collections.push(coll.name);
-    //             });
-
-    //             db.close();
-    //             cb(null, res);    
-    //         });
-    //     });    
-    // });
 }
 
 // Get all databases

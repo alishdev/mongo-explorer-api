@@ -25,8 +25,8 @@ exports.parseConnectionString = function(req, logger){
     var urlTokens = req.originalUrl.split("/");
     logger.info(urlTokens);
     if (urlTokens.length > 2){
-        if (urlTokens[1] === 'db')  // skip first token and check if second token is db
-            req.connectionString.dbName = urlTokens[2];
+        if (urlTokens[1] === 'api' && urlTokens[2] === 'db')  // skip first token and check if second token is api and third is db
+            req.connectionString.dbName = urlTokens[3];
     }
 
     if (logger){
