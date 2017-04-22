@@ -28,7 +28,7 @@ var start =  function(cb) {
       version: '1.0.0',
       description: 'Explore any Mongo database',
     },
-    host: 'https://dry-spire-23794.herokuapp.com',
+    host: 'dry-spire-23794.herokuapp.com',
     basePath: '/',
   };
 
