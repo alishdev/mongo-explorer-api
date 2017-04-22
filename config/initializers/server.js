@@ -102,7 +102,10 @@ var start =  function(cb) {
     res.send(swaggerSpec);
   });
 
-  app.listen(config.get('NODE_PORT'));
+  if (config.get('NODE_PORT') > 0)
+    app.listen(config.get('NODE_PORT'));
+  else
+    app.listen();
   logger.info('[SERVER] Listening on port ' + config.get('NODE_PORT'));
   
   if (cb) {
