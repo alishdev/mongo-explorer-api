@@ -1,9 +1,9 @@
 // config/environment/development.js
 var nconf = require('nconf');
-nconf.set('url', 'mywebsite.com');
+nconf.set('swagger', {
+  host: 'localhost:4000'
+});
 
-nconf.set('database', {
-  user: 'username',
-  password: 'password',
-  server: 'url'
+nconf.set('http', {
+  port: 4000
 });

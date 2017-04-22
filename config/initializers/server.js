@@ -19,7 +19,8 @@ var start =  function(cb) {
   'use strict';
   // Configure express 
   app = express();
-  var port = process.env.PORT || config.get('NODE_PORT');
+  var port = process.env.PORT || config.get('http:port');
+  var swaggerHost = config.get('swagger:host');
 
   // swagger definition
   var swaggerDefinition = {
@@ -28,7 +29,7 @@ var start =  function(cb) {
       version: '1.0.0',
       description: 'Explore any Mongo database',
     },
-    host: 'dry-spire-23794.herokuapp.com',
+    host: swaggerHost,
     basePath: '/',
   };
 
@@ -115,6 +116,7 @@ var start =  function(cb) {
 
   app.listen(port);
   logger.info('[SERVER] Listening on port ' + port);
+  logger.info('[SERVER] Swagger host ' + swaggerHost);
   
   if (cb) {
     return cb();
