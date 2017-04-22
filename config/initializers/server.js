@@ -102,11 +102,9 @@ var start =  function(cb) {
     res.send(swaggerSpec);
   });
 
-  if (config.get('NODE_PORT') > 0)
-    app.listen(config.get('NODE_PORT'));
-  else
-    app.listen();
-  logger.info('[SERVER] Listening on port ' + config.get('NODE_PORT'));
+  var port = process.env.PORT || config.get('NODE_PORT');
+  app.listen(port);
+  logger.info('[SERVER] Listening on port ' + port);
   
   if (cb) {
     return cb();
