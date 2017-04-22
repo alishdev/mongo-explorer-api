@@ -55,6 +55,12 @@ var start =  function(cb) {
   app.use(bodyParser.urlencoded({extended: true}));
   app.use(bodyParser.json({type: '*/*'}));
 
+  app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });
+
       // use middleware to read headers and get mongo db properties
   app.use(function(req, res, next){
       // read mongo server properties from the header
