@@ -36,3 +36,13 @@ exports.parseConnectionString = function(req, logger){
             dbName = ${req.connectionString.dbName}`);
     }
 };
+
+/**
+ * Parse HTTP request url and return true if it starts with api/db
+ * @method
+ * @param {object} req HTTP request.
+ * @return {boolean}
+ */
+exports.isAPICall = function(req){
+    return req.originalUrl.startsWith("/api/db");
+};

@@ -62,22 +62,26 @@ var start =  function(cb) {
       // req.connectionString.port = req.headers['mongo-server-port'] || 27017;
       // logger.info(req.connectionString);
       var parseConnectionString = require('../../app/helpers/request-helper');
-      parseConnectionString.parseConnectionString(req, logger);
+      if (!parseConnectionString.isAPICall(req))
+        next();
+      else{
+        parseConnectionString.parseConnectionString(req, logger);
 
-      var dbHelper = require('../../app/helpers/db-helper');
-      dbHelper.getMongoConnection(req.connectionString, logger, function(err, db){
-        if (err){
-          res.status(err.status || 500);
-          res.json({
-            message: err.message,
-            error: (app.get('env') === 'development.js' ? err : {})
-          });
-        }
-        else{
-          req.connectionString.mongoDb = db;
-          next();
-        }
-      });
+        var dbHelper = require('../../app/helpers/db-helper');
+        dbHelper.getMongoConnection(req.connectionString, logger, function(err, db){
+          if (err){
+            res.status(err.status || 500);
+            res.json({
+              message: err.message,
+              error: (app.get('env') === 'development.js' ? err : {})
+            });
+          }
+          else{
+            req.connectionString.mongoDb = db;
+            next();
+          }
+        });
+      }
   });
 
   logger.info('[SERVER] Initializing routes');
