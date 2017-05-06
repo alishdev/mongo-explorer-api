@@ -32,7 +32,11 @@ exports.getMongoConnection = function(connectionString, logger, callback){
         return callback(null, DbList[hash])
     }
     
-    var db = new Database(connectionString.dbName || DEFAULT_DB_NAME, new Server(connectionString.server, connectionString.port));
+    var db = 
+        new Database(connectionString.dbName || DEFAULT_DB_NAME, 
+            new Server(connectionString.server, 
+                connectionString.port, 
+                {ssl:connectionString.ssl === "true"}));
     logger.info(`getMongoConnection: opening new connection`);
     // Establish connection to db
     db.open(function(err, db) {
