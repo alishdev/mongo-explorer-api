@@ -3,6 +3,9 @@
 // header or parameter names
 const HEADER_SERVER_NAME = 'mongo-server';
 const HEADER_PORT_NAME = 'mongo-server-port';
+const HEADER_USER_NAME = 'mongo-server-user';
+const HEADER_PASSWORD_NAME = 'mongo-server-password';
+const HEADER_SSL_NAME = 'mongo-server-ssl';
 
 // default values
 const DEFAULT_MONGO_SERVER = 'localhost';
@@ -20,6 +23,9 @@ exports.parseConnectionString = function(req, logger){
     req.connectionString = {};
     req.connectionString.server = req.headers[HEADER_SERVER_NAME] || DEFAULT_MONGO_SERVER;
     req.connectionString.port = req.headers[HEADER_PORT_NAME] || DEFAULT_MONGO_PORT;
+    req.connectionString.user = req.headers[HEADER_USER_NAME];
+    req.connectionString.password = req.headers[HEADER_PASSWORD_NAME];
+    req.connectionString.ssl = req.headers[HEADER_SSL_NAME] || false;
 
     // all urls start with /db/:dbName, so by splitting url we can find database name    
     var urlTokens = req.originalUrl.split("/");
@@ -33,7 +39,10 @@ exports.parseConnectionString = function(req, logger){
         logger.info(`connection string: 
             server = ${req.connectionString.server}, 
             port = ${req.connectionString.port}
-            dbName = ${req.connectionString.dbName}`);
+            user = ${req.connectionString.user}
+            password = ${req.connectionString.password}
+            dbName = ${req.connectionString.dbName}
+            ssl = ${req.connectionString.ssl}`);
     }
 };
 
