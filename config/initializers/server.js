@@ -74,21 +74,7 @@ var start =  function(cb) {
         next();
       else{
         parseConnectionString.parseConnectionString(req, logger);
-
-        var dbHelper = require('../../app/helpers/db-helper');
-        dbHelper.getMongoConnection(req.connectionString, logger, function(err, db){
-          if (err){
-            res.status(err.status || 500);
-            res.json({
-              message: err.message,
-              error: (app.get('env') === 'development.js' ? err : {})
-            });
-          }
-          else{
-            req.connectionString.mongoDb = db;
-            next();
-          }
-        });
+        next();
       }
   });
 

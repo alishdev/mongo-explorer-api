@@ -5,5 +5,6 @@ nconf.set('swagger', {
 });
 
 nconf.set('http', {
-  port: 4000
+  port: 4000,
+  host: 'localhost'
 });

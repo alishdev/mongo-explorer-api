@@ -50,3 +50,21 @@ exports.getMongoConnection = function(connectionString, logger, callback){
         }
     });
 };
+
+/**
+ * Create mongo db url from connectionString
+ * @param {object} connectionString connection string from HTTP request.
+ * @param {object} logger Winston logger.
+ * @return url, e.g. mongodb://localhost:27017
+ */
+exports.getMongoURL = function(connectionString, logger){
+    let url = 'mongodb://' + (connectionString.user === null ? '' : (connectionString.user + ':')) 
+        + (connectionString.password === null ? '' : (connectionString.password + '@')) 
+        + connectionString.server + ':' + 
+        connectionString.port;
+    if (typeof connectionString.dbName != "undefined")
+        url += '/' + connectionString.dbName;
+
+    logger.info(`connection url: ${url}`);
+    return url;
+};

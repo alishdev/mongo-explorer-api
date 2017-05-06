@@ -1,58 +1,60 @@
 // models/db/db.js
 // Db class
-var Database = require('mongodb').Db,
+var MongoClient = require('mongodb').MongoClient,
+    Database = require('mongodb').Db,
     Server = require('mongodb').Server,
-    logger = require('winston');
+    logger = require('winston'),
+    co = require('co');
+var dbHelper = require('../../helpers/db-helper');
 
-// Get particular database properties
+// Get one particular database properties
 exports.get = function(connectionString, dbName, cb) {
     logger.info("Inside db.get, dbName: " + dbName);
-    logger.info(connectionString.server);
-    logger.info(connectionString.port);
-    logger.info(connectionString.dbName);
 
-    var db = connectionString.mongoDb;
+    return co(function*() {
+        let url = dbHelper.getMongoURL(connectionString, logger);
+        var res = {name: dbName, collections : []};
+        try
+        {
+            let db = yield MongoClient.connect(url, {ssl:connectionString.ssl});
+            let collections = yield db.listCollections().toArray();
 
-    var res = {name: dbName, collections : []};
-    db.listCollections().toArray(function(err, collections) {
-        db.close();
-        // collections is an array of collection info objects that look like:
-        // { name: 'test', options: {} }
-        if (err)
-            cb(err);
-                        
-        collections.forEach(function(coll){
-            res.collections.push(coll.name);
-        });
+            collections.forEach(function(coll){
+                res.collections.push(coll.name);
+            });
 
-        cb(null, res);    
+            console.log(res);
+            db.close();
+
+            cb(null, res);
+        }
+        catch(e)
+        {
+            console.log(e.message);
+            return cb(e);
+        }
     });
 }
 
 // Get all databases
- function allDbs(connectionString, cb) {
-    logger.info("Inside db.all");
-    //logger.info(connectionString);
-
-    var db = new Database('test', new Server(connectionString.server, connectionString.port));
-    // Establish connection to db
-    db.open(function(err, db) {
-        if (err)
-            cb(err);
-        // Use the admin database for the operation
-        var adminDb = db.admin();
-
-        // List all the available databases
-        adminDb.listDatabases(function(err, dbs) {
+function allDbs(connectionString, cb) {
+    return co(function*() {
+        let url = dbHelper.getMongoURL(connectionString, logger);
+        
+        try
+        {
+            let db = yield MongoClient.connect(url, {ssl:connectionString.ssl});
+            let dbs = yield db.command({listDatabases:1});
+            console.log(dbs);
             db.close();
-            //logger.info(dbs);
-            
-            if (err)
-                cb(err);
-
             const dbFound = dbs.databases.map(function(db1){return db1.name;});
             cb(null, dbFound);
-        });
+        }
+        catch(e)
+        {
+            console.log(e.message);
+            return cb(e);
+        }
     });
 }
 
