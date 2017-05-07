@@ -3,27 +3,12 @@
 // route file for MongoDB databases
 var logger = require('winston');
 
-let router = require('express').Router(),
-    database = require('../../models/db/db');
+let router = require('express').Router({ mergeParams: true }),
+    collection = require('../../models/collection/collection');
 
 /**************************************************************** 
  * Swagger schema definitions
 *****************************************************************/
-
-//-------  Database object
-/**
- * @swagger
- * definitions:
- *   Database:
- *     type: object
- *     properties:
- *       name:
- *         type: string
- *       collections:
- *         type: array
- *         items:
- *           type: string
- */
 
 //--------  Collection object
 /**
@@ -36,6 +21,14 @@ let router = require('express').Router(),
  *         type: string
  *       docsCount:
  *         type: number
+ *       size:
+ *         type: number
+ *       avgObjSize:
+ *         type: number
+ *       indexes:
+ *          type: array
+ *          items:
+ *             type: string
  */
 
 /**************************************************************** 
@@ -68,8 +61,8 @@ let router = require('express').Router(),
  *         schema:
  *           $ref: '#definitions/Collection'
  */
-router.get('/:dbname/collection/:colname', function(req, res) {    
-    database.get(req.params.dbname, function(err, db){
+router.get('/:colname', function(req, res) {    
+    collection.get(req.connectionString, req.params.colname, function(err, db){
         if (err)
             res.status(404).send(err);
         res.status(200).json(db);
@@ -99,11 +92,12 @@ router.get('/:dbname/collection/:colname', function(req, res) {
  *          items:
  *              type: string
  */
-router.get('/:dbname/collection', function(req, res) {
-    database.all(req.connectionString, function(err, dbs){
+router.get('/', function(req, res) {
+    collection.all(req.connectionString, function(err, db){
         if (err)
             res.status(404).send(err);
-        
-        res.status(200).json(dbs);
+        res.status(200).json(db);
     });
 });
+
+module.exports = router;

@@ -1,35 +1,37 @@
 // models/db/db.js
 // Db class
 var MongoClient = require('mongodb').MongoClient,
-    Database = require('mongodb').Db,
     Server = require('mongodb').Server,
     logger = require('winston'),
     co = require('co');
 var dbHelper = require('../../helpers/db-helper');
 
-// Get one particular database properties
-exports.get = function(connectionString, dbName, cb) {
-    logger.info("Inside db.get, dbName: " + dbName);
-
+function get(connectionString, collName, cb) {
     return co(function*() {
         let url = dbHelper.getMongoURL(connectionString, logger);
-        let res = {name: dbName, collections : []};
         let db;
         try
         {
             db = yield MongoClient.connect(url, {ssl:connectionString.ssl});
-            let collections = yield db.listCollections().toArray();
+            // Retrieve the statistics for the collection
+            let collection = db.collection(collName);
+            let stats = yield collection.stats();
+            let collStats = {
+                name: collName,
+                docsCount: stats.count,
+                size : stats.size,
+                avgObjSize: stats.avgObjSize,
+            };
 
-            collections.forEach(function(coll){
-                res.collections.push(coll.name);
-            });
+                // get index information
+            let indexes = yield collection.indexes();
+            collStats.indexes = indexes.map(idx => idx.name);
 
-            logger.info(res);
-            cb(null, res);
+            cb(null, collStats);
         }
         catch(e)
         {
-            logger.info(e.message);
+            logger.error(e.message);
             return cb(e);
         }
         finally{
@@ -40,20 +42,21 @@ exports.get = function(connectionString, dbName, cb) {
 }
 
 // Get all databases
-function allDbs(connectionString, cb) {
+function all(connectionString, cb) {
     return co(function*() {
         let url = dbHelper.getMongoURL(connectionString, logger);
         let db;
         try
         {
             db = yield MongoClient.connect(url, {ssl:connectionString.ssl});
-            let dbs = yield db.command({listDatabases:1});
-            const dbFound = dbs.databases.map(function(db1){return db1.name;});
-            cb(null, dbFound);
+            let collections = yield db.listCollections().toArray();
+
+            const collFound = collections.map(function(coll){return coll.name;});
+            cb(null, collFound);
         }
         catch(e)
         {
-            console.log(e.message);
+            logger.error(e.message);
             return cb(e);
         }
         finally{
@@ -63,4 +66,5 @@ function allDbs(connectionString, cb) {
     });
 }
 
-exports.all = allDbs;
+exports.all = all;
+exports.get = get;

@@ -25,18 +25,6 @@ let router = require('express').Router(),
  *           type: string
  */
 
-//--------  Collection object
-/**
- * @swagger
- * definitions:
- *   Collection:
- *     type: object
- *     properties:
- *       name:
- *         type: string
- *       docsCount:
- *         type: number
- */
 
 /**************************************************************** 
  * Document API
