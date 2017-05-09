@@ -1,29 +1,14 @@
 // app/routes/document/index.js
+// route file for document endpoints
 
-// route file for MongoDB databases
 var logger = require('winston');
 
-let router = require('express').Router(),
-    database = require('../../models/db/db');
+let router = require('express').Router({ mergeParams: true }),
+    document = require('../../models/document/document');
 
 /**************************************************************** 
  * Swagger schema definitions
 *****************************************************************/
-
-//-------  Database object
-/**
- * @swagger
- * definitions:
- *   Database:
- *     type: object
- *     properties:
- *       name:
- *         type: string
- *       collections:
- *         type: array
- *         items:
- *           type: string
- */
 
 
 /**************************************************************** 
@@ -32,11 +17,11 @@ let router = require('express').Router(),
 
 /**
  * @swagger
- * /api/db/{dbname}/collection/{colname}/doc:
+ * /api/db/{dbname}/collection/{colname}/doc/{docid}:
  *   get:
  *     tags:
  *       - Documents
- *     description: Returns an array of documents in selected collection
+ *     description: Returns a specific documents by its id
  *     produces:
  *       - application/json
  *     parameters:
@@ -50,19 +35,27 @@ let router = require('express').Router(),
  *         in: path
  *         required: true
  *         type: string
+ *       - name: docid
+ *         description: Document _id
+ *         in: path
+ *         required: true
+ *         type: string
  *     responses:
  *       200:
- *         description: array of documents in collection
+ *         description: document contents
  *         schema:
- *          type: array
- *          items:
- *              type: object
+ *          type: object
  */
-router.get('/:dbname/collection/{colname}/doc', function(req, res) {
-    database.all(req.connectionString, function(err, dbs){
+router.get('/:docid', function(req, res) {
+    let collName = req.params.collName;
+    let docid = req.params.docid;
+    logger.info(`get doc coll: ${collName}, docid = ${docid}`);
+    document.get(req.connectionString, collName, docid, function(err, doc){
         if (err)
             res.status(404).send(err);
-        
-        res.status(200).json(dbs);
+        else
+            res.status(200).json(doc);
     });
 });
+
+module.exports = router;

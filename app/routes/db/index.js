@@ -55,7 +55,8 @@ router.get('/:dbname', function(req, res) {
     database.get(req.connectionString, req.params.dbname, function(err, db){
         if (err)
             res.status(404).send(err);
-        res.status(200).json(db);
+        else
+            res.status(200).json(db);
     });
 });
 
@@ -80,8 +81,8 @@ router.get('/', function(req, res) {
     database.all(req.connectionString, function(err, dbs){
         if (err)
             res.status(404).send(err);
-        
-        res.status(200).json(dbs);
+        else
+            res.status(200).json(dbs);
     });
 });
 

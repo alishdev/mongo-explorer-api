@@ -1,33 +1,26 @@
-// models/collection/collection.js
-// Collection class
+// models/db/document.js
+
 var MongoClient = require('mongodb').MongoClient,
-    Server = require('mongodb').Server,
+    ObjectID = require('mongodb').ObjectID,
     logger = require('winston'),
     co = require('co');
 var dbHelper = require('../../helpers/db-helper');
 
-function get(connectionString, collName, cb) {
+// get single document
+function get(connectionString, collName, docid, cb) {
     return co(function*() {
         let url = dbHelper.getMongoURL(connectionString, logger);
         let db;
         try
         {
             db = yield MongoClient.connect(url, {ssl:connectionString.ssl});
-            // Retrieve the statistics for the collection
-            let collection = db.collection(collName);
-            let stats = yield collection.stats();
-            let collStats = {
-                name: collName,
-                docsCount: stats.count,
-                size : stats.size,
-                avgObjSize: stats.avgObjSize,
-            };
+            var collection = db.collection(collName);
 
-                // get index information
-            let indexes = yield collection.indexes();
-            collStats.indexes = indexes.map(idx => idx.name);
+            var id = new ObjectID(docid);
+            // Perform a simple find
+            var doc = yield collection.findOne({'_id':id});
 
-            cb(null, collStats);
+            cb(null, doc);
         }
         catch(e)
         {
@@ -41,8 +34,8 @@ function get(connectionString, collName, cb) {
     });
 }
 
-// Get all databases
-function all(connectionString, cb) {
+// Get range of documents
+function range(connectionString, colname, rangeParams, cb) {
     return co(function*() {
         let url = dbHelper.getMongoURL(connectionString, logger);
         let db;
@@ -66,5 +59,5 @@ function all(connectionString, cb) {
     });
 }
 
-exports.all = all;
+exports.range = range;
 exports.get = get;

@@ -9,10 +9,11 @@ routes.get('/', (req, res) => {
 const dbs = require('./db');
 routes.use('/api/db', dbs);
 
-console.log(routes);
-
 const collections = require('./collection');
 routes.use('/api/db/:dbName/collection', collections);
+
+const documents = require('./document');
+routes.use('/api/db/:dbName/collection/:collName/doc', documents);
 
 console.log(routes);
 

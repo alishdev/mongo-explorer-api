@@ -1,8 +1,7 @@
 // app/routes/collection/index.js
+// route file for Collection endpoints
 
-// route file for MongoDB databases
 var logger = require('winston');
-
 let router = require('express').Router({ mergeParams: true }),
     collection = require('../../models/collection/collection');
 
@@ -62,10 +61,11 @@ let router = require('express').Router({ mergeParams: true }),
  *           $ref: '#definitions/Collection'
  */
 router.get('/:colname', function(req, res) {    
-    collection.get(req.connectionString, req.params.colname, function(err, db){
+    collection.get(req.connectionString, req.params.colname, function(err, coll){
         if (err)
             res.status(404).send(err);
-        res.status(200).json(db);
+        else
+            res.status(200).json(coll);
     });
 });
 
@@ -93,10 +93,11 @@ router.get('/:colname', function(req, res) {
  *              type: string
  */
 router.get('/', function(req, res) {
-    collection.all(req.connectionString, function(err, db){
+    collection.all(req.connectionString, function(err, colls){
         if (err)
             res.status(404).send(err);
-        res.status(200).json(db);
+        else
+            res.status(200).json(colls);
     });
 });
 
